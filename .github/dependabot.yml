@@ -1,0 +1,16 @@
+---
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    ignore:
+      # The setup-dokku action is pinned to the docket release in go.mod, so
+      # it moves with the gomod update; TestSetupDokkuMatchesDocket fails
+      # until both agree.
+      - dependency-name: "dokku/docket*"
