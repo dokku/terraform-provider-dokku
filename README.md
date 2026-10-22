@@ -36,6 +36,16 @@ provider_installation {
 
 `make testacc` runs the acceptance tests against a real Dokku server. The provider reads its settings from the environment, so set `DOKKU_HOST` to reach a remote server, or `DOKKU_SUDO=true` to run `dokku` locally through `sudo`. Tests for a plugin skip when the plugin is not installed. CI installs the server with docket's `setup-dokku` action, pinned at the docket version in `go.mod`, so it runs the Dokku and plugin versions that docket release was tested against.
 
+## Verifying a release
+
+Releases are signed with the key in [.github/signing-key.asc](.github/signing-key.asc), fingerprint `7F8A 213F 3370 CEF0 69D9 813A 02A8 D8D8 D47E 4BC9`. Terraform checks the signature on `terraform init`. To check a release by hand, import the key and verify the checksums file against its signature:
+
+```shell
+gpg --import .github/signing-key.asc
+gpg --verify terraform-provider-dokku_<VERSION>_SHA256SUMS.sig terraform-provider-dokku_<VERSION>_SHA256SUMS
+shasum -a 256 -c terraform-provider-dokku_<VERSION>_SHA256SUMS
+```
+
 ## License
 
 MIT
