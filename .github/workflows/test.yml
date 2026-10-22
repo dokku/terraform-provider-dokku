@@ -1,0 +1,55 @@
+---
+name: test
+
+# yamllint disable-line rule:truthy
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: unit
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - name: Build
+        run: go build ./...
+      - name: Check generated docs and examples
+        run: |
+          go generate ./...
+          git diff --exit-code docs examples
+      - name: Test
+        run: go test ./...
+      - name: Test with the race detector
+        run: go test -race ./...
+
+  acceptance:
+    name: acceptance
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      # Keep this tag equal to the docket version in go.mod;
+      # TestSetupDokkuMatchesDocket fails otherwise.
+      - uses: dokku/docket/.github/actions/setup-dokku@v0.11.0
+      - name: Acceptance tests
+        env:
+          TF_ACC: "1"
+          DOKKU_SUDO: "true"
+        run: go test ./internal/provider -run TestAcc -v -timeout 60m

@@ -1,0 +1,1 @@
+terraform import dokku_scheduler_k3s_node_sysctls.example 'dokku_scheduler_k3s_node_sysctls[global=true]'
